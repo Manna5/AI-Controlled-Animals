@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+ <head>
+  <title>AI-Controlled Animals</title>
+ </head>
+ <body>
+  <h1>AI-Controlled Animals</h1>
+  <p><script language="JavaScript" type="text/javascript">
+   var animals=[[2,5,"up"],[4,7,"down"],[10,4,"right"],[14,13,"left"]];
+	 var foods=[[2,2],[7,7],[4,6],[8,3],[13,7]];
+	 var i,j;
+	 document.write("<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-width:3px;border-style:solid;border-color:blue\">");
+	 for(i=0;i<16;i++){
+	  document.write("<tr>");
+		for(j=0;j<16;j++){
+		 document.write("<td><img src=\"blank.png\" alt=\"grid item\" id=\""+j+"x"+i+"\"></td>");
+		}
+		document.write("</tr>");
+	 }
+	 document.write("</table>");
+	 function get_grid_item(x,y){
+	  return document.getElementById(x+"x"+y);
+	 }
+	 function update_animals(){
+	  var i,j;
+	  for(i=0;i<16;i++){
+		 for(j=0;j<16;j++){
+		  get_grid_item(i,j).src="blank.png";
+		 }
+		}
+		for(i=0;i<animals.length;i++){
+		 var a=animals[i];
+		 get_grid_item(a[0],a[1]).src="animal_"+a[2]+".png";
+		}
+	 }
+	 function update_foods(){
+		for(i=0;i<foods.length;i++){
+		 var f=foods[i];
+		 if(f[0]>=0){
+		  get_grid_item(f[0],f[1]).src="food.png";
+		 }
+		}
+	 }
+	 function move_animals(){
+	  var i;
+		for(i=0;i<animals.length;i++){
+		 var d=animals[i][2];
+		 if(d=="up"){
+		  animals[i][1]--;
+		 }else if(d=="down"){
+		  animals[i][1]++;
+		 }else if(d=="left"){
+		  animals[i][0]--;
+		 }else if(d=="right"){
+		  animals[i][0]++;
+		 }
+		}
+	 }
+	 function check_bounds(){
+	  var i;
+		for(i=0;i<animals.length;i++){
+		 var a=animals[i];
+		 if(a[0]<0){
+		  a[0]=0;
+		 }else if(a[0]>15){
+		  a[0]=15;
+		 }else if(a[1]<0){
+		  a[1]=0;
+		 }else if(a[1]>15){
+		  a[1]=15;
+		 }
+		}
+	 }
+	 function is_food(x,y){
+	  var i;
+		if(x<0 || x>15 || y<0 || y>15){
+		 return false;
+		}
+		for(i=0;i<foods.length;i++){
+		 var f=foods[i];
+		 if(f[0]==x && f[1]==y){
+		  return true;
+		 }
+		}
+		return false;
+	 }
+	 function ai_turn(a,nf){
+	  if(nf[0]){
+		 return "up";
+		}else if(nf[1]){
+		 return "down";
+		}else if(nf[2]){
+		 return "left";
+		}else if(nf[3]){
+		 return "right";
+	  }else if(a[1]<1){
+		 return "down";
+		}else if(a[1]>14){
+		 return "up";
+		}else if(a[0]<1){
+		 return "right";
+		}else if(a[0]>14){
+		 return "left";
+		}else return a[2];
+	 }
+	 function brain_impulse(){
+	  var i;
+		for(i=0;i<animals.length;i++){
+		 var a=animals[i];
+		 var near_food=[is_food(a[0],a[1]-1),is_food(a[0],a[1]+1),is_food(a[0]-1,a[1]),is_food(a[0]+1,a[1])];
+		 a[2]=ai_turn(a,near_food);
+		}
+	 }
+	 function check_eaten(){
+	  var i,j;
+		for(i=0;i<foods.length;i++){
+		 var f=foods[i];
+		 for(j=0;j<animals.length;j++){
+		  var a=animals[j];
+			if(f[0]==a[0] && f[1]==a[1]){
+			 f[0]=-1;
+			}
+		 }
+		}
+	 }
+	 function find_empty_food_slot(){
+	  var i;
+		for(i=0;i<foods.length;i++){
+		 if(foods[i][0]<0){
+		  return i;
+		 }
+		}
+		return -1;
+	 }
+	 function add_random_food(){
+	  var free_slot=find_empty_food_slot();
+		var new_food_x=Math.floor(Math.random()*15);
+		var new_food_y=Math.floor(Math.random()*15);
+		if(free_slot<0){
+		 foods.push([new_food_x,new_food_y]);
+		}else{
+		 foods[free_slot]=[new_food_x,new_food_y];
+		}
+	 }
+	 function game_round(){
+	  check_eaten();
+	  update_animals();
+		update_foods();
+		move_animals();
+		check_bounds();
+		brain_impulse();
+		if(add_food){
+		 add_random_food();
+		 add_food=false;
+		}else add_food=true;
+	 }
+	 var add_food=false;
+	 setInterval(game_round,1000);
+  </script><p>
+	<p>Each "animal" have got four eyes, one per direction. All of these are controlled by the same AI. Per one round, each animal moves one field forward, and
+	AI can change its direction. Animal AI knows the animal position, current direction, and can see food if it "touchs" the animal. A single eye gives the AI one
+	boolean specifying that there is food on the eye direction of the animal. Four eyes, left eye, right eye, forward eye and backward eye gives the animal a
+	4-pixel 360&deg; image of the near world. This application is entirely written in JavaScript. Currently there is no machine learning.
+	<a href="..\index.html">Home</a></p>
+ </body>
+</html>
